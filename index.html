@@ -368,6 +368,13 @@
         background: transparent;
       }
 
+      .markdown-section td,
+      .markdown-section th,
+      .markdown-section code,
+      .markdown-section a {
+        overflow-wrap: anywhere;
+      }
+
       .docsify-copy-code-button {
         right: 0.75rem !important;
         top: 0.75rem !important;
@@ -575,6 +582,37 @@
           left: 0;
           top: calc(var(--dc-navbar-height) + 1.8rem);
           padding: 1rem;
+        }
+
+        .markdown-section {
+          overflow-x: clip;
+        }
+
+        .markdown-section table {
+          display: table;
+          table-layout: fixed;
+          overflow-x: visible;
+        }
+
+        .markdown-section th,
+        .markdown-section td {
+          min-width: 0;
+          white-space: normal;
+          word-break: break-word;
+        }
+
+        .markdown-section code {
+          white-space: break-spaces;
+          word-break: break-word;
+        }
+
+        .markdown-section pre {
+          overflow-x: clip;
+        }
+
+        .markdown-section pre code {
+          white-space: pre-wrap;
+          word-break: break-word;
         }
 
         .page-sequence {
