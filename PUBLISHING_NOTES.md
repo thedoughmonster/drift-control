@@ -1,28 +1,21 @@
-# Drift Control Packet Public Root
+# Publishing Notes
 
-This directory is the standalone publication root for the drift-control guide.
+This repository is a maintainer-facing publication root for the public drift-control handbook.
 
-## Contents
+The current publishable artifact set in this root is:
 
-- `README.md`: one-file guide for Docsify and GitHub Pages
-- `index.html`: Docsify entrypoint
-- `_sidebar.md`: Docsify sidebar
-- `.nojekyll`: disables Jekyll processing on GitHub Pages
+- `README.md`: handbook landing page and Docsify homepage content
+- `core-model.md`: system model, drift loop, and evidence standard
+- `minimum-viable-implementation.md`: baseline minimum controls and complexity-triggered additions
+- `enforcement-model.md`: layered enforcement explanation, legend, and control matrix
+- `implementation-guide.md`: adoption sequence and operating patterns
+- `reference-implementation-example.md`: optional appendix with one concrete implementation example
+- `_sidebar.md`: Docsify navigation
+- `index.html`: Docsify shell entrypoint
+- `.nojekyll`: GitHub Pages compatibility marker
 
-## Source Of Truth
+Publishing guidance:
 
-This publication root is derived from:
-
-- `runbook-tooling/workstreams/drift-control-packet-dev-path/DRIFT_CONTROL_PACKET.md`
-- `runbook-tooling/workstreams/drift-control-packet-dev-path/docsify-site/`
-
-## Publishing Options
-
-1. Use this directory as the content root in a separate repo.
-2. Publish it with GitHub Pages.
-3. If needed later, add a GitHub Pages Actions workflow in the destination repo.
-
-## Boundary
-
-This directory is intended for public delivery.
-The split packet, workstream state, artifacts, and repo-specific archive remain outside this root.
+- publish the repository root as a static site
+- keep filenames and relative links stable when adding new handbook pages
+- keep maintainer notes limited to this public artifact set and its packaging behavior
