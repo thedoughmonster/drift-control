@@ -1,6 +1,9 @@
-- [Handbook Home](README.md)
-- [Core Model](core-model.md)
-- [Minimum Viable Implementation](minimum-viable-implementation.md)
-- [Enforcement Model](enforcement-model.md)
-- [Implementation Guide](implementation-guide.md)
-- [Reference Implementation Example Appendix](reference-implementation-example.md)
+- Getting Started
+  - [Home](README.md)
+  - [Core Model](core-model.md)
+  - [Minimum Viable Implementation](minimum-viable-implementation.md)
+- Reference
+  - [Enforcement Model](enforcement-model.md)
+  - [Implementation Guide](implementation-guide.md)
+- Appendix
+  - [Reference Implementation Example](reference-implementation-example.md)

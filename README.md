@@ -1,45 +1,62 @@
 # Drift Control Handbook
 
-Drift control is the practice of keeping rule meaning, readable guidance, executable enforcement, and recovery state aligned as one operating model.
+Drift control is an operating model for keeping rule meaning, readable guidance, executable enforcement, and recovery state aligned over time.
 
-This guide is for engineering teams that want to establish drift control in their own repositories. The main pages stay generic so the model can be reused without inheriting a specific repository layout or naming scheme. A separate optional appendix shows one concrete implementation example.
+This handbook is for engineering teams that want to establish drift control in their own repositories. The main guide stays generic so teams can adopt the model without inheriting a specific repository layout, protocol family, or tooling stack.
 
-## Start Here
+> Start with the first four pages for the transferable model. Use the reference appendix only if you want to see one concrete implementation example.
 
-If you are new to the model:
+## What You Can Do Here
+
+- understand the core drift-control model and why it transfers across repositories
+- identify the baseline minimum controls required for a credible implementation
+- study the layered enforcement model for local checks, shared automation, and recovery
+- follow a practical adoption sequence for rolling the model into a live engineering system
+
+## Read By Goal
+
+### I Need The Core Model
 
 1. Read [Core Model](core-model.md).
 2. Read [Minimum Viable Implementation](minimum-viable-implementation.md).
 3. Read [Implementation Guide](implementation-guide.md).
 
-If you are evaluating controls:
+### I Need To Evaluate Enforcement
 
 1. Read [Core Model](core-model.md).
 2. Read [Enforcement Model](enforcement-model.md).
 3. Read [Implementation Guide](implementation-guide.md).
 
-If you want concrete examples:
+### I Need A Concrete Example
 
-1. Read the core pages first.
+1. Read the main handbook pages first.
 2. Then use [Reference Implementation Example](reference-implementation-example.md).
 
-## Guide Map
+## Documentation Structure
 
-| Page | Purpose |
+| Page | Role |
 | --- | --- |
-| [Core Model](core-model.md) | explains what drift control is, why it matters, the system model, and the end-to-end drift loop |
-| [Minimum Viable Implementation](minimum-viable-implementation.md) | defines the baseline minimum controls required for drift control |
-| [Enforcement Model](enforcement-model.md) | explains the layered enforcement stack and includes the control matrix plus legend |
-| [Implementation Guide](implementation-guide.md) | shows how to adopt the model in rollout order and how to operate it over time |
-| [Reference Implementation Example](reference-implementation-example.md) | optional concrete examples of one implementation, including local names, paths, and commands |
+| [Core Model](core-model.md) | defines the system model, the drift loop, and the authority/publication/evidence split |
+| [Minimum Viable Implementation](minimum-viable-implementation.md) | defines the minimum baseline before a system deserves to be called drift control |
+| [Enforcement Model](enforcement-model.md) | explains the layered enforcement stack and provides the control matrix |
+| [Implementation Guide](implementation-guide.md) | gives the rollout order, operational patterns, and long-run operating guidance |
+| [Reference Implementation Example](reference-implementation-example.md) | optional appendix with one concrete implementation lane and local naming example |
 
-## What This Handbook Covers
+## Recommended Reading Order
 
-- how to separate authority, publication, enforcement, and recovery
-- how to define the minimum viable control model
-- how to build a fuller implementation without collapsing all control into CI
-- how to keep checkpoints, archives, and retrieval from becoming weak points
-- how to translate the model into another repository without copying local folklore
+If you want the handbook as a sequential technical guide, read the pages in this order:
+
+1. [Core Model](core-model.md)
+2. [Minimum Viable Implementation](minimum-viable-implementation.md)
+3. [Enforcement Model](enforcement-model.md)
+4. [Implementation Guide](implementation-guide.md)
+5. [Reference Implementation Example](reference-implementation-example.md)
+
+## What This Handbook Assumes
+
+- you need a way to keep rules, docs, automation, and recovery aligned
+- your repository has enough complexity that informal memory is no longer reliable
+- you want a model that can survive handoffs, interruptions, and evolving tooling
 
 ## What This Handbook Does Not Assume
 
@@ -47,10 +64,6 @@ If you want concrete examples:
 - a specific CI provider
 - a specific documentation generator
 - a specific local command set
-- a specific work-orchestration workflow
+- a specific work orchestration workflow
 
-Those details are implementation choices. The handbook focuses on the control architecture that should stay stable even when the tooling changes.
-
-## Reading Rule
-
-Treat the first four pages as the main handbook. Treat the reference implementation page as optional supporting material.
+Those are implementation choices. The handbook focuses on the control architecture that should remain stable even when the tooling changes.

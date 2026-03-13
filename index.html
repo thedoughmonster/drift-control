@@ -11,7 +11,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, minimum-scale=1.0"
     >
-    <meta name="theme-color" content="#101418">
+    <meta name="theme-color" content="#0f1720">
     <title>Drift Control Handbook</title>
     <link
       rel="stylesheet"
@@ -19,175 +19,147 @@
     >
     <style>
       :root {
-        --theme-color: #3fb6a8;
-        --dc-bg: #f4f7f8;
-        --dc-bg-elevated: #ffffff;
-        --dc-text: #112025;
-        --dc-text-soft: #43606a;
-        --dc-border: #d5e2e6;
-        --dc-code-bg: #edf3f5;
-        --dc-accent: #0f766e;
-        --dc-accent-strong: #0b5f59;
-        --dc-sidebar-bg: #edf4f5;
-        --dc-sidebar-text: #153039;
-        --dc-sidebar-text-soft: #4a6973;
-        --dc-shadow: 0 18px 40px rgba(12, 24, 29, 0.08);
+        --theme-color: #147d73;
+        --dc-bg: #f3f6f7;
+        --dc-bg-elevated: rgba(255, 255, 255, 0.94);
+        --dc-bg-soft: rgba(238, 245, 246, 0.82);
+        --dc-text: #13242a;
+        --dc-text-soft: #4d6871;
+        --dc-border: rgba(151, 176, 184, 0.28);
+        --dc-accent: #147d73;
+        --dc-accent-strong: #0e655d;
+        --dc-code-bg: #eaf2f4;
+        --dc-shadow: 0 24px 70px rgba(12, 28, 33, 0.08);
+        --dc-sidebar-width: 300px;
+        --dc-outline-width: 280px;
+        --dc-navbar-height: 64px;
       }
 
       :root.theme-dark {
-        --theme-color: #66d9c6;
-        --dc-bg: #101418;
-        --dc-bg-elevated: #172027;
-        --dc-text: #e6f1f3;
-        --dc-text-soft: #9cb5bc;
-        --dc-border: #2d3d46;
-        --dc-code-bg: #0d1418;
-        --dc-accent: #66d9c6;
-        --dc-accent-strong: #8ff0df;
-        --dc-sidebar-bg: #131b21;
-        --dc-sidebar-text: #ebf6f8;
-        --dc-sidebar-text-soft: #9bb6bd;
-        --dc-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+        --theme-color: #67dbc8;
+        --dc-bg: #0f1720;
+        --dc-bg-elevated: rgba(20, 29, 37, 0.92);
+        --dc-bg-soft: rgba(24, 34, 44, 0.82);
+        --dc-text: #e7f3f5;
+        --dc-text-soft: #9fb7be;
+        --dc-border: rgba(120, 151, 163, 0.24);
+        --dc-accent: #67dbc8;
+        --dc-accent-strong: #91efe0;
+        --dc-code-bg: #111a22;
+        --dc-shadow: 0 28px 70px rgba(0, 0, 0, 0.32);
       }
 
       @media (prefers-color-scheme: dark) {
         :root:not(.theme-light) {
-          --theme-color: #66d9c6;
-          --dc-bg: #101418;
-          --dc-bg-elevated: #172027;
-          --dc-text: #e6f1f3;
-          --dc-text-soft: #9cb5bc;
-          --dc-border: #2d3d46;
-          --dc-code-bg: #0d1418;
-          --dc-accent: #66d9c6;
-          --dc-accent-strong: #8ff0df;
-          --dc-sidebar-bg: #131b21;
-          --dc-sidebar-text: #ebf6f8;
-          --dc-sidebar-text-soft: #9bb6bd;
-          --dc-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+          --theme-color: #67dbc8;
+          --dc-bg: #0f1720;
+          --dc-bg-elevated: rgba(20, 29, 37, 0.92);
+          --dc-bg-soft: rgba(24, 34, 44, 0.82);
+          --dc-text: #e7f3f5;
+          --dc-text-soft: #9fb7be;
+          --dc-border: rgba(120, 151, 163, 0.24);
+          --dc-accent: #67dbc8;
+          --dc-accent-strong: #91efe0;
+          --dc-code-bg: #111a22;
+          --dc-shadow: 0 28px 70px rgba(0, 0, 0, 0.32);
         }
+      }
+
+      * {
+        box-sizing: border-box;
       }
 
       body,
       .content,
       .sidebar,
+      .topbar,
+      .page-outline,
       .markdown-section,
       .search input,
-      .search .results-panel {
-        transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+      .search .results-panel,
+      .theme-toggle,
+      .page-sequence__card {
+        transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
       }
 
       body {
-        background: var(--dc-bg);
+        margin: 0;
+        background:
+          radial-gradient(circle at top left, rgba(20, 125, 115, 0.12), transparent 22rem),
+          radial-gradient(circle at top right, rgba(20, 125, 115, 0.08), transparent 24rem),
+          var(--dc-bg);
         color: var(--dc-text);
       }
 
-      .app-name-link,
-      .sidebar ul li a,
-      .markdown-section strong,
-      .markdown-section p,
-      .markdown-section li,
-      .markdown-section blockquote,
-      .markdown-section td,
-      .markdown-section th {
+      .topbar__brand,
+      .topbar__nav a,
+      .sidebar-nav a,
+      .markdown-section a,
+      .page-outline__nav a,
+      .page-sequence__card,
+      .theme-toggle,
+      .docsify-copy-code-button {
+        transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+      }
+
+      .topbar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        height: var(--dc-navbar-height);
+        padding: 0 1.25rem;
+        background: var(--dc-bg-elevated);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--dc-border);
+        box-shadow: var(--dc-shadow);
+      }
+
+      .topbar__brand {
         color: var(--dc-text);
+        text-decoration: none;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
       }
 
-      .sidebar {
-        background: var(--dc-sidebar-bg);
-        border-right: 1px solid var(--dc-border);
+      .topbar__nav {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
       }
 
-      .sidebar ul li a {
-        color: var(--dc-sidebar-text-soft);
+      .topbar__nav a {
+        color: var(--dc-text-soft);
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 600;
       }
 
-      .sidebar ul li.active > a,
-      .sidebar ul li a:hover,
-      .app-name-link:hover {
+      .topbar__nav a:hover,
+      .topbar__nav a.active,
+      .topbar__brand:hover,
+      .sidebar-nav a:hover,
+      .sidebar-nav li.active > a,
+      .page-outline__nav a:hover,
+      .page-outline__nav a.is-active,
+      .markdown-section a:hover {
         color: var(--dc-accent-strong);
       }
 
-      .app-name {
-        border-bottom: 1px solid var(--dc-border);
-      }
-
-      .content {
-        background: var(--dc-bg);
-      }
-
-      .markdown-section {
-        color: var(--dc-text);
-        max-width: 960px;
-      }
-
-      .markdown-section h1,
-      .markdown-section h2,
-      .markdown-section h3,
-      .markdown-section h4,
-      .markdown-section h5,
-      .markdown-section h6 {
-        color: var(--dc-text);
-      }
-
-      .markdown-section a {
-        color: var(--dc-accent);
-      }
-
-      .markdown-section code,
-      .markdown-section pre,
-      .markdown-section table tr:nth-child(2n) {
-        background: var(--dc-code-bg);
-      }
-
-      .markdown-section pre,
-      .markdown-section table,
-      .markdown-section th,
-      .markdown-section td,
-      .search input,
-      .search .results-panel,
       .theme-toggle {
+        margin-left: auto;
         border: 1px solid var(--dc-border);
-      }
-
-      .markdown-section pre {
-        box-shadow: var(--dc-shadow);
-      }
-
-      .markdown-section blockquote {
-        border-left: 4px solid var(--dc-accent);
-        background: var(--dc-bg-elevated);
-      }
-
-      .markdown-section hr {
-        border-color: var(--dc-border);
-      }
-
-      .search {
-        margin-bottom: 1rem;
-      }
-
-      .search input,
-      .search .results-panel {
-        background: var(--dc-bg-elevated);
-        color: var(--dc-text);
-      }
-
-      .search input::placeholder {
-        color: var(--dc-text-soft);
-      }
-
-      .theme-toggle {
-        position: fixed;
-        top: 14px;
-        right: 18px;
-        z-index: 30;
         border-radius: 999px;
-        background: var(--dc-bg-elevated);
+        background: var(--dc-bg-soft);
         color: var(--dc-text);
         box-shadow: var(--dc-shadow);
-        padding: 0.45rem 0.75rem;
-        font: 600 12px/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        padding: 0.5rem 0.82rem;
+        font: 700 0.75rem/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         cursor: pointer;
       }
 
@@ -195,15 +167,380 @@
         color: var(--dc-accent-strong);
       }
 
+      .sidebar {
+        top: var(--dc-navbar-height);
+        width: var(--dc-sidebar-width);
+        padding-top: 1.2rem;
+        background: transparent;
+        border-right: 0;
+      }
+
+      .search {
+        margin: 0 1rem 1rem;
+        padding: 0.8rem 0.9rem;
+        background: var(--dc-bg-elevated);
+        border: 1px solid var(--dc-border);
+        border-radius: 1rem;
+        box-shadow: var(--dc-shadow);
+      }
+
+      .search input,
+      .search .results-panel {
+        background: var(--dc-bg-soft);
+        color: var(--dc-text);
+        border: 1px solid var(--dc-border);
+        border-radius: 0.8rem;
+      }
+
+      .search input {
+        padding: 0.8rem 0.95rem;
+      }
+
+      .search input::placeholder {
+        color: var(--dc-text-soft);
+      }
+
+      .search .results-panel {
+        margin-top: 0.6rem;
+        box-shadow: var(--dc-shadow);
+      }
+
+      .sidebar-nav {
+        margin: 0 1rem 1.5rem;
+        padding: 1.1rem 1rem;
+        background: var(--dc-bg-elevated);
+        border: 1px solid var(--dc-border);
+        border-radius: 1rem;
+        box-shadow: var(--dc-shadow);
+      }
+
+      .sidebar-nav > ul > li {
+        margin: 0 0 0.9rem;
+        color: var(--dc-text-soft);
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .sidebar-nav ul li a {
+        color: var(--dc-text);
+      }
+
+      .sidebar-nav ul li ul li a {
+        display: block;
+        padding: 0.48rem 0.6rem;
+        margin: 0 0 0.25rem;
+        border-radius: 0.75rem;
+      }
+
+      .sidebar-nav ul li.active > ul > li.active > a,
+      .sidebar-nav ul li ul li a:hover {
+        background: var(--dc-bg-soft);
+      }
+
+      .content {
+        left: var(--dc-sidebar-width);
+        right: 0;
+        top: var(--dc-navbar-height);
+        padding: 2rem 2rem 5rem;
+        background: transparent;
+      }
+
+      .markdown-section {
+        max-width: 920px;
+        margin: 0;
+        padding: 2.5rem 3rem 3rem;
+        color: var(--dc-text);
+        background: var(--dc-bg-elevated);
+        border: 1px solid var(--dc-border);
+        border-radius: 1.5rem;
+        box-shadow: var(--dc-shadow);
+      }
+
+      .markdown-section h1,
+      .markdown-section h2,
+      .markdown-section h3,
+      .markdown-section h4,
+      .markdown-section h5,
+      .markdown-section h6,
+      .markdown-section p,
+      .markdown-section li,
+      .markdown-section td,
+      .markdown-section th,
+      .markdown-section strong {
+        color: var(--dc-text);
+      }
+
+      .markdown-section h1 {
+        margin-bottom: 1rem;
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        letter-spacing: -0.04em;
+      }
+
+      .markdown-section h2 {
+        margin-top: 2.7rem;
+        font-size: 1.55rem;
+        letter-spacing: -0.03em;
+      }
+
+      .markdown-section h3 {
+        margin-top: 1.9rem;
+        font-size: 1.16rem;
+      }
+
+      .markdown-section p,
+      .markdown-section li,
+      .markdown-section td {
+        font-size: 1rem;
+        line-height: 1.72;
+      }
+
+      .markdown-section table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: var(--dc-bg-soft);
+        border: 1px solid var(--dc-border);
+        border-radius: 1rem;
+      }
+
+      .markdown-section tr:nth-child(2n) {
+        background: transparent;
+      }
+
+      .markdown-section th,
+      .markdown-section td {
+        border-color: var(--dc-border);
+      }
+
+      .markdown-section blockquote {
+        margin: 1.5rem 0;
+        border-left: 4px solid var(--dc-accent);
+        border-radius: 0.8rem;
+        background: var(--dc-bg-soft);
+      }
+
+      .markdown-section pre,
+      .markdown-section code {
+        background: var(--dc-code-bg);
+      }
+
+      .markdown-section pre {
+        position: relative;
+        padding: 1.15rem 1.15rem 1rem;
+        border: 1px solid var(--dc-border);
+        border-radius: 1rem;
+        box-shadow: var(--dc-shadow);
+      }
+
+      .markdown-section pre > code {
+        background: transparent;
+      }
+
+      .docsify-copy-code-button {
+        right: 0.75rem !important;
+        top: 0.75rem !important;
+        padding: 0.35rem 0.65rem !important;
+        border: 1px solid var(--dc-border) !important;
+        border-radius: 999px !important;
+        background: var(--dc-bg-elevated) !important;
+        color: var(--dc-text-soft) !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+      }
+
+      .docsify-copy-code-button:hover {
+        color: var(--dc-accent-strong) !important;
+        transform: translateY(-1px);
+      }
+
+      .page-outline {
+        position: fixed;
+        top: calc(var(--dc-navbar-height) + 1.4rem);
+        right: 1.25rem;
+        width: var(--dc-outline-width);
+        max-height: calc(100vh - var(--dc-navbar-height) - 2rem);
+        overflow: auto;
+        padding: 1rem;
+        background: var(--dc-bg-elevated);
+        border: 1px solid var(--dc-border);
+        border-radius: 1rem;
+        box-shadow: var(--dc-shadow);
+        display: none;
+      }
+
+      .page-outline.is-visible {
+        display: block;
+      }
+
+      .page-outline__eyebrow {
+        margin: 0 0 0.85rem;
+        color: var(--dc-text-soft);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .page-outline__nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.22rem;
+      }
+
+      .page-outline__nav a {
+        display: block;
+        color: var(--dc-text-soft);
+        padding: 0.38rem 0.48rem;
+        border-left: 2px solid transparent;
+        font-size: 0.88rem;
+        line-height: 1.35;
+      }
+
+      .page-outline__nav a.level-h3 {
+        margin-left: 0.8rem;
+        font-size: 0.82rem;
+      }
+
+      .page-outline__nav a.is-active {
+        color: var(--dc-accent-strong);
+        border-left-color: var(--dc-accent);
+        background: var(--dc-bg-soft);
+      }
+
+      .page-sequence {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+        margin-top: 2.25rem;
+      }
+
+      .page-sequence__card {
+        display: block;
+        min-height: 110px;
+        padding: 1rem 1.05rem;
+        background: var(--dc-bg-soft);
+        border: 1px solid var(--dc-border);
+        border-radius: 1rem;
+        color: var(--dc-text);
+        text-decoration: none;
+      }
+
+      .page-sequence__card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(20, 125, 115, 0.35);
+        box-shadow: var(--dc-shadow);
+      }
+
+      .page-sequence__direction {
+        display: block;
+        margin-bottom: 0.42rem;
+        color: var(--dc-text-soft);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .page-sequence__title {
+        display: block;
+        margin-bottom: 0.35rem;
+        color: var(--dc-text);
+        font-size: 1rem;
+        font-weight: 700;
+      }
+
+      .page-sequence__description {
+        color: var(--dc-text-soft);
+        font-size: 0.9rem;
+        line-height: 1.45;
+      }
+
+      .sidebar-toggle {
+        top: calc(var(--dc-navbar-height) + 0.75rem);
+        display: none;
+      }
+
+      @media screen and (min-width: 1380px) {
+        .content {
+          right: calc(var(--dc-outline-width) + 2rem);
+        }
+      }
+
+      @media screen and (max-width: 1199px) {
+        .page-outline {
+          display: none !important;
+        }
+
+        .content {
+          right: 0;
+        }
+      }
+
+      @media screen and (max-width: 959px) {
+        .topbar {
+          padding-left: 4rem;
+          padding-right: 1rem;
+        }
+
+        .markdown-section {
+          padding: 2rem 1.4rem 2.4rem;
+        }
+      }
+
       @media screen and (max-width: 768px) {
+        .sidebar-toggle {
+          display: block;
+        }
+
+        .topbar {
+          height: auto;
+          min-height: var(--dc-navbar-height);
+          flex-wrap: wrap;
+          padding-top: 0.85rem;
+          padding-bottom: 0.85rem;
+        }
+
+        .topbar__nav {
+          width: 100%;
+          flex-wrap: wrap;
+          gap: 0.7rem;
+        }
+
         .theme-toggle {
-          top: 10px;
-          right: 56px;
+          margin-left: 0;
+        }
+
+        .sidebar {
+          top: 0;
+        }
+
+        .content {
+          left: 0;
+          top: calc(var(--dc-navbar-height) + 1.8rem);
+          padding: 1rem;
+        }
+
+        .page-sequence {
+          grid-template-columns: 1fr;
         }
       }
     </style>
   </head>
   <body>
+    <header class="topbar">
+      <a class="topbar__brand" href="#/README">Drift Control Handbook</a>
+      <nav class="topbar__nav" aria-label="Primary">
+        <a href="#/README" data-nav-path="/README">Home</a>
+        <a href="#/core-model" data-nav-path="/core-model">Guide</a>
+        <a href="#/implementation-guide" data-nav-path="/implementation-guide">Implementation</a>
+        <a href="https://github.com/thedoughmonster/drift-control" target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
+      <button class="theme-toggle" type="button">Dark mode</button>
+    </header>
     <div id="app"></div>
     <script>
       (function () {
@@ -214,23 +551,69 @@
           document.documentElement.classList.add("theme-light");
         }
       })();
-
-      window.$docsify = {
-        name: "Drift Control Handbook",
-        homepage: "README.md",
-        loadSidebar: true,
-        relativePath: false,
-        subMaxLevel: 3,
-        auto2top: true,
-        search: {
-          paths: "auto",
-          placeholder: "Search this guide",
-          noData: "No matching section",
-        },
-      };
     </script>
     <script>
       (function () {
+        var pageOrder = [
+          {
+            path: "/README",
+            label: "Home",
+            description: "Introduction, reading paths, and the guide structure."
+          },
+          {
+            path: "/core-model",
+            label: "Core Model",
+            description: "What drift control is and how the model stays aligned."
+          },
+          {
+            path: "/minimum-viable-implementation",
+            label: "Minimum Viable Implementation",
+            description: "The baseline controls required before the model is credible."
+          },
+          {
+            path: "/enforcement-model",
+            label: "Enforcement Model",
+            description: "Layered enforcement and the control matrix."
+          },
+          {
+            path: "/implementation-guide",
+            label: "Implementation Guide",
+            description: "Rollout order, operational patterns, and long-run adoption."
+          },
+          {
+            path: "/reference-implementation-example",
+            label: "Reference Implementation Example",
+            description: "Optional concrete mapping of the model to one repository family."
+          }
+        ];
+
+        var outlineObserver;
+
+        function getCurrentPath() {
+          var hash = window.location.hash || "#/README";
+          var route = hash.replace(/^#/, "");
+          var path = route.split("?")[0];
+          if (!path || path === "/") return "/README";
+          return path;
+        }
+
+        function getBaseHash() {
+          return "#" + getCurrentPath();
+        }
+
+        function ensureThemeToggle() {
+          var button = document.querySelector(".theme-toggle");
+          if (!button || button.dataset.ready === "true") {
+            if (button) applyTheme(getTheme());
+            return;
+          }
+          button.dataset.ready = "true";
+          button.addEventListener("click", function () {
+            applyTheme(getTheme() === "dark" ? "light" : "dark");
+          });
+          applyTheme(getTheme());
+        }
+
         function getTheme() {
           if (document.documentElement.classList.contains("theme-dark")) return "dark";
           if (document.documentElement.classList.contains("theme-light")) return "light";
@@ -242,31 +625,172 @@
           document.documentElement.classList.add(theme === "dark" ? "theme-dark" : "theme-light");
           localStorage.setItem("drift-control-theme", theme);
           var meta = document.querySelector('meta[name="theme-color"]');
-          if (meta) meta.setAttribute("content", theme === "dark" ? "#101418" : "#f4f7f8");
+          if (meta) meta.setAttribute("content", theme === "dark" ? "#0f1720" : "#f3f6f7");
           var button = document.querySelector(".theme-toggle");
           if (button) button.textContent = theme === "dark" ? "Light mode" : "Dark mode";
         }
 
-        function ensureToggle() {
-          if (document.querySelector(".theme-toggle")) return;
-          var button = document.createElement("button");
-          button.className = "theme-toggle";
-          button.type = "button";
-          button.addEventListener("click", function () {
-            applyTheme(getTheme() === "dark" ? "light" : "dark");
-          });
-          document.body.appendChild(button);
-          applyTheme(getTheme());
+        function ensureOutline() {
+          var outline = document.querySelector(".page-outline");
+          if (outline) return outline;
+          outline = document.createElement("aside");
+          outline.className = "page-outline";
+          outline.innerHTML = [
+            '<p class="page-outline__eyebrow">On this page</p>',
+            '<nav class="page-outline__nav"></nav>'
+          ].join("");
+          document.body.appendChild(outline);
+          return outline;
         }
 
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", ensureToggle);
-        } else {
-          ensureToggle();
+        function renderOutline() {
+          var outline = ensureOutline();
+          var nav = outline.querySelector(".page-outline__nav");
+          var section = document.querySelector(".markdown-section");
+          if (!section || !nav) return;
+
+          var headings = Array.prototype.slice.call(section.querySelectorAll("h2, h3")).filter(function (heading) {
+            return heading.id && heading.textContent.trim();
+          });
+
+          if (!headings.length || window.innerWidth < 1200) {
+            nav.innerHTML = "";
+            outline.classList.remove("is-visible");
+            if (outlineObserver) outlineObserver.disconnect();
+            return;
+          }
+
+          nav.innerHTML = headings.map(function (heading) {
+            var level = heading.tagName.toLowerCase();
+            return (
+              '<a class="level-' + level + '" href="' +
+              getBaseHash() + "?id=" + encodeURIComponent(heading.id) +
+              '" data-target="' + heading.id + '">' +
+              heading.textContent +
+              "</a>"
+            );
+          }).join("");
+
+          outline.classList.add("is-visible");
+          if (outlineObserver) outlineObserver.disconnect();
+          outlineObserver = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                var link = nav.querySelector('[data-target="' + entry.target.id + '"]');
+                if (!link || !entry.isIntersecting) return;
+                nav.querySelectorAll("a").forEach(function (item) {
+                  item.classList.remove("is-active");
+                });
+                link.classList.add("is-active");
+              });
+            },
+            {
+              rootMargin: "-15% 0px -70% 0px",
+              threshold: [0, 1]
+            }
+          );
+
+          headings.forEach(function (heading, index) {
+            if (index === 0) {
+              var first = nav.querySelector('[data-target="' + heading.id + '"]');
+              if (first) first.classList.add("is-active");
+            }
+            outlineObserver.observe(heading);
+          });
         }
+
+        function renderSequence() {
+          var section = document.querySelector(".markdown-section");
+          if (!section) return;
+          var existing = section.querySelector(".page-sequence");
+          if (existing) existing.remove();
+
+          var path = getCurrentPath();
+          var index = pageOrder.findIndex(function (page) {
+            return page.path === path;
+          });
+          if (index === -1) return;
+
+          var previous = pageOrder[index - 1];
+          var next = pageOrder[index + 1];
+          if (!previous && !next) return;
+
+          var container = document.createElement("nav");
+          container.className = "page-sequence";
+          container.setAttribute("aria-label", "Page navigation");
+
+          function buildCard(direction, page) {
+            if (!page) return "";
+            return [
+              '<a class="page-sequence__card" href="#' + page.path + '">',
+              '<span class="page-sequence__direction">' + direction + "</span>",
+              '<span class="page-sequence__title">' + page.label + "</span>",
+              '<span class="page-sequence__description">' + page.description + "</span>",
+              "</a>"
+            ].join("");
+          }
+
+          container.innerHTML = buildCard("Previous", previous) + buildCard("Next", next);
+          section.appendChild(container);
+        }
+
+        function syncTopbarState() {
+          var path = getCurrentPath();
+          document.querySelectorAll(".topbar__nav [data-nav-path]").forEach(function (link) {
+            link.classList.toggle("active", link.getAttribute("data-nav-path") === path);
+          });
+        }
+
+        function syncDocumentTitle() {
+          var path = getCurrentPath();
+          var page = pageOrder.find(function (item) {
+            return item.path === path;
+          });
+          document.title = page ? page.label + " | Drift Control Handbook" : "Drift Control Handbook";
+        }
+
+        window.$docsify = {
+          name: "Drift Control Handbook",
+          nameLink: "#/README",
+          homepage: "README.md",
+          loadSidebar: true,
+          relativePath: false,
+          autoHeader: true,
+          subMaxLevel: 2,
+          maxLevel: 4,
+          auto2top: true,
+          themeColor: "#147d73",
+          search: {
+            paths: "auto",
+            depth: 4,
+            placeholder: "Search concepts, sections, and terms",
+            noData: "No matching section"
+          },
+          plugins: [
+            function (hook) {
+              hook.ready(function () {
+                ensureThemeToggle();
+                syncTopbarState();
+                syncDocumentTitle();
+              });
+
+              hook.doneEach(function () {
+                ensureThemeToggle();
+                syncTopbarState();
+                syncDocumentTitle();
+                renderOutline();
+                renderSequence();
+              });
+            }
+          ]
+        };
+
+        window.addEventListener("resize", renderOutline);
+        window.addEventListener("hashchange", syncTopbarState);
       })();
     </script>
     <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
     <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
   </body>
 </html>
