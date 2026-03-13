@@ -84,11 +84,20 @@
 
       body {
         margin: 0;
-        background:
-          radial-gradient(circle at top left, rgba(20, 125, 115, 0.12), transparent 22rem),
-          radial-gradient(circle at top right, rgba(20, 125, 115, 0.08), transparent 24rem),
-          var(--dc-bg);
+        background: var(--dc-bg);
         color: var(--dc-text);
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background:
+          radial-gradient(circle at 12% 10%, rgba(20, 125, 115, 0.16), transparent 26rem),
+          radial-gradient(circle at 88% 8%, rgba(20, 125, 115, 0.12), transparent 30rem),
+          radial-gradient(circle at 50% 100%, rgba(20, 125, 115, 0.08), transparent 34rem);
       }
 
       .topbar__brand,
@@ -131,6 +140,16 @@
         display: flex;
         align-items: center;
         gap: 1rem;
+        flex-wrap: wrap;
+        position: static !important;
+        inset: auto !important;
+        margin: 0 !important;
+        width: auto !important;
+        pointer-events: none;
+      }
+
+      .topbar__nav a {
+        pointer-events: auto;
       }
 
       .topbar__nav a {
@@ -152,7 +171,10 @@
       }
 
       .theme-toggle {
-        margin-left: auto;
+        position: fixed;
+        right: 1.25rem;
+        bottom: 1.25rem;
+        z-index: 60;
         border: 1px solid var(--dc-border);
         border-radius: 999px;
         background: var(--dc-bg-soft);
@@ -328,6 +350,12 @@
         background: var(--dc-code-bg);
       }
 
+      .markdown-section hr {
+        margin: 2rem 0;
+        border: 0;
+        border-top: 1px solid var(--dc-border);
+      }
+
       .markdown-section pre {
         position: relative;
         padding: 1.15rem 1.15rem 1rem;
@@ -352,9 +380,33 @@
         font-weight: 700 !important;
       }
 
+      .docsify-copy-code-button .error,
+      .docsify-copy-code-button .success {
+        display: none !important;
+      }
+
+      .docsify-copy-code-button.error .label,
+      .docsify-copy-code-button.success .label {
+        display: none !important;
+      }
+
+      .docsify-copy-code-button.error .error,
+      .docsify-copy-code-button.success .success {
+        display: inline !important;
+      }
+
       .docsify-copy-code-button:hover {
         color: var(--dc-accent-strong) !important;
         transform: translateY(-1px);
+      }
+
+      .markdown-section .mermaid {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: var(--dc-bg-soft);
+        border: 1px solid var(--dc-border);
+        border-radius: 1rem;
+        overflow-x: auto;
       }
 
       .page-outline {
@@ -511,7 +563,8 @@
         }
 
         .theme-toggle {
-          margin-left: 0;
+          right: 1rem;
+          bottom: 1rem;
         }
 
         .sidebar {
@@ -536,12 +589,12 @@
       <nav class="topbar__nav" aria-label="Primary">
         <a href="#/README" data-nav-path="/README">Home</a>
         <a href="#/core-model" data-nav-path="/core-model">Guide</a>
-        <a href="#/implementation-guide" data-nav-path="/implementation-guide">Implementation</a>
+        <a href="#/code-index-template" data-nav-path="/code-index-template">Templates</a>
         <a href="https://github.com/thedoughmonster/drift-control" target="_blank" rel="noreferrer">GitHub</a>
       </nav>
-      <button class="theme-toggle" type="button">Dark mode</button>
     </header>
     <div id="app"></div>
+    <button class="theme-toggle" type="button">Dark mode</button>
     <script>
       (function () {
         var storedTheme = localStorage.getItem("drift-control-theme");
@@ -581,6 +634,26 @@
             description: "Rollout order, operational patterns, and long-run adoption."
           },
           {
+            path: "/code-index-template",
+            label: "Code Index Template",
+            description: "Build an index-first retrieval layer with local query surfaces."
+          },
+          {
+            path: "/canon-authority-template",
+            label: "Canon Authority Template",
+            description: "Define a central source of semantic authority and generated publication surfaces."
+          },
+          {
+            path: "/ci-integration-template",
+            label: "CI Integration Template",
+            description: "Turn drift-control rules into merge-blocking automation and determinism checks."
+          },
+          {
+            path: "/tempgo-protocol-template",
+            label: "Tempgo Protocol Template",
+            description: "Run bounded workstreams with step-list authority, seam audits, and resumable state."
+          },
+          {
             path: "/reference-implementation-example",
             label: "Reference Implementation Example",
             description: "Optional concrete mapping of the model to one repository family."
@@ -588,6 +661,7 @@
         ];
 
         var outlineObserver;
+        var copyButtonObserver;
 
         function getCurrentPath() {
           var hash = window.location.hash || "#/README";
@@ -614,6 +688,16 @@
           applyTheme(getTheme());
         }
 
+        function normalizeTopbarNav() {
+          var nav = document.querySelector(".topbar__nav");
+          if (!nav) return;
+          nav.classList.remove("app-nav", "no-badge");
+          nav.style.position = "static";
+          nav.style.inset = "auto";
+          nav.style.margin = "0";
+          nav.style.width = "auto";
+        }
+
         function getTheme() {
           if (document.documentElement.classList.contains("theme-dark")) return "dark";
           if (document.documentElement.classList.contains("theme-light")) return "light";
@@ -628,6 +712,63 @@
           if (meta) meta.setAttribute("content", theme === "dark" ? "#0f1720" : "#f3f6f7");
           var button = document.querySelector(".theme-toggle");
           if (button) button.textContent = theme === "dark" ? "Light mode" : "Dark mode";
+          window.requestAnimationFrame(renderMermaid);
+        }
+
+        function renderMermaid() {
+          if (!window.mermaid) return;
+
+          window.mermaid.initialize({
+            startOnLoad: false,
+            securityLevel: "loose",
+            theme: getTheme() === "dark" ? "dark" : "neutral"
+          });
+
+          var section = document.querySelector(".markdown-section");
+          if (!section) return;
+
+          Array.prototype.slice.call(
+            section.querySelectorAll('pre[data-lang="mermaid"], pre code.language-mermaid')
+          ).forEach(function (node) {
+            var pre = node.tagName === "PRE" ? node : node.parentElement;
+            if (!pre || pre.dataset.mermaidReady === "true") return;
+            var code = pre.querySelector("code");
+            var source = code ? code.textContent : pre.textContent;
+            var wrapper = document.createElement("div");
+            wrapper.className = "mermaid";
+            wrapper.dataset.source = source;
+            wrapper.textContent = source;
+            pre.dataset.mermaidReady = "true";
+            pre.replaceWith(wrapper);
+          });
+
+          window.mermaid.run({
+            nodes: Array.prototype.slice.call(section.querySelectorAll(".mermaid[data-source]")).map(function (node) {
+              node.innerHTML = node.dataset.source;
+              node.removeAttribute("data-processed");
+              return node;
+            })
+          });
+        }
+
+        function normalizeCopyButtons() {
+          document.querySelectorAll(".docsify-copy-code-button").forEach(function (button) {
+            var error = button.querySelector(".error");
+            var success = button.querySelector(".success");
+            if (error) error.remove();
+            if (success) success.remove();
+          });
+        }
+
+        function ensureCopyButtonObserver() {
+          if (copyButtonObserver) return;
+          copyButtonObserver = new MutationObserver(function () {
+            normalizeCopyButtons();
+          });
+          copyButtonObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+          });
         }
 
         function ensureOutline() {
@@ -770,25 +911,42 @@
             function (hook) {
               hook.ready(function () {
                 ensureThemeToggle();
+                normalizeTopbarNav();
+                ensureCopyButtonObserver();
+                normalizeCopyButtons();
                 syncTopbarState();
                 syncDocumentTitle();
               });
 
               hook.doneEach(function () {
                 ensureThemeToggle();
+                normalizeTopbarNav();
                 syncTopbarState();
                 syncDocumentTitle();
-                renderOutline();
-                renderSequence();
+                window.setTimeout(function () {
+                  normalizeTopbarNav();
+                  renderMermaid();
+                  normalizeCopyButtons();
+                  renderOutline();
+                  renderSequence();
+                }, 50);
+                window.setTimeout(normalizeTopbarNav, 300);
+                window.setTimeout(normalizeTopbarNav, 1000);
+                window.setTimeout(normalizeCopyButtons, 300);
+                window.setTimeout(normalizeCopyButtons, 1000);
               });
             }
           ]
         };
 
         window.addEventListener("resize", renderOutline);
-        window.addEventListener("hashchange", syncTopbarState);
+        window.addEventListener("hashchange", function () {
+          syncTopbarState();
+          syncDocumentTitle();
+        });
       })();
     </script>
+    <script src="//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
     <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>

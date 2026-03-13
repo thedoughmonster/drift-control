@@ -2,8 +2,13 @@
   - [Home](README.md)
   - [Core Model](core-model.md)
   - [Minimum Viable Implementation](minimum-viable-implementation.md)
-- Reference
+- Control Architecture
   - [Enforcement Model](enforcement-model.md)
   - [Implementation Guide](implementation-guide.md)
+- System Templates
+  - [Code Index Template](code-index-template.md)
+  - [Central Semantic Authority Template](canon-authority-template.md)
+  - [CI Integration Template](ci-integration-template.md)
+  - [tempgo Protocol Template](tempgo-protocol-template.md)
 - Appendix
   - [Reference Implementation Example](reference-implementation-example.md)
