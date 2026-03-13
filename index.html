@@ -5,31 +5,221 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta
       name="description"
-      content="Standalone drift-control guide for external repos."
+      content="Public handbook for establishing drift control in any repository."
     >
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, minimum-scale=1.0"
     >
-    <title>Drift Control Packet</title>
+    <meta name="theme-color" content="#101418">
+    <title>Drift Control Handbook</title>
     <link
       rel="stylesheet"
       href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css"
     >
     <style>
       :root {
-        --theme-color: #0f766e;
+        --theme-color: #3fb6a8;
+        --dc-bg: #f4f7f8;
+        --dc-bg-elevated: #ffffff;
+        --dc-text: #112025;
+        --dc-text-soft: #43606a;
+        --dc-border: #d5e2e6;
+        --dc-code-bg: #edf3f5;
+        --dc-accent: #0f766e;
+        --dc-accent-strong: #0b5f59;
+        --dc-sidebar-bg: #edf4f5;
+        --dc-sidebar-text: #153039;
+        --dc-sidebar-text-soft: #4a6973;
+        --dc-shadow: 0 18px 40px rgba(12, 24, 29, 0.08);
+      }
+
+      :root.theme-dark {
+        --theme-color: #66d9c6;
+        --dc-bg: #101418;
+        --dc-bg-elevated: #172027;
+        --dc-text: #e6f1f3;
+        --dc-text-soft: #9cb5bc;
+        --dc-border: #2d3d46;
+        --dc-code-bg: #0d1418;
+        --dc-accent: #66d9c6;
+        --dc-accent-strong: #8ff0df;
+        --dc-sidebar-bg: #131b21;
+        --dc-sidebar-text: #ebf6f8;
+        --dc-sidebar-text-soft: #9bb6bd;
+        --dc-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root:not(.theme-light) {
+          --theme-color: #66d9c6;
+          --dc-bg: #101418;
+          --dc-bg-elevated: #172027;
+          --dc-text: #e6f1f3;
+          --dc-text-soft: #9cb5bc;
+          --dc-border: #2d3d46;
+          --dc-code-bg: #0d1418;
+          --dc-accent: #66d9c6;
+          --dc-accent-strong: #8ff0df;
+          --dc-sidebar-bg: #131b21;
+          --dc-sidebar-text: #ebf6f8;
+          --dc-sidebar-text-soft: #9bb6bd;
+          --dc-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+        }
+      }
+
+      body,
+      .content,
+      .sidebar,
+      .markdown-section,
+      .search input,
+      .search .results-panel {
+        transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+      }
+
+      body {
+        background: var(--dc-bg);
+        color: var(--dc-text);
+      }
+
+      .app-name-link,
+      .sidebar ul li a,
+      .markdown-section strong,
+      .markdown-section p,
+      .markdown-section li,
+      .markdown-section blockquote,
+      .markdown-section td,
+      .markdown-section th {
+        color: var(--dc-text);
+      }
+
+      .sidebar {
+        background: var(--dc-sidebar-bg);
+        border-right: 1px solid var(--dc-border);
+      }
+
+      .sidebar ul li a {
+        color: var(--dc-sidebar-text-soft);
+      }
+
+      .sidebar ul li.active > a,
+      .sidebar ul li a:hover,
+      .app-name-link:hover {
+        color: var(--dc-accent-strong);
+      }
+
+      .app-name {
+        border-bottom: 1px solid var(--dc-border);
+      }
+
+      .content {
+        background: var(--dc-bg);
+      }
+
+      .markdown-section {
+        color: var(--dc-text);
+        max-width: 960px;
+      }
+
+      .markdown-section h1,
+      .markdown-section h2,
+      .markdown-section h3,
+      .markdown-section h4,
+      .markdown-section h5,
+      .markdown-section h6 {
+        color: var(--dc-text);
+      }
+
+      .markdown-section a {
+        color: var(--dc-accent);
+      }
+
+      .markdown-section code,
+      .markdown-section pre,
+      .markdown-section table tr:nth-child(2n) {
+        background: var(--dc-code-bg);
+      }
+
+      .markdown-section pre,
+      .markdown-section table,
+      .markdown-section th,
+      .markdown-section td,
+      .search input,
+      .search .results-panel,
+      .theme-toggle {
+        border: 1px solid var(--dc-border);
+      }
+
+      .markdown-section pre {
+        box-shadow: var(--dc-shadow);
+      }
+
+      .markdown-section blockquote {
+        border-left: 4px solid var(--dc-accent);
+        background: var(--dc-bg-elevated);
+      }
+
+      .markdown-section hr {
+        border-color: var(--dc-border);
+      }
+
+      .search {
+        margin-bottom: 1rem;
+      }
+
+      .search input,
+      .search .results-panel {
+        background: var(--dc-bg-elevated);
+        color: var(--dc-text);
+      }
+
+      .search input::placeholder {
+        color: var(--dc-text-soft);
+      }
+
+      .theme-toggle {
+        position: fixed;
+        top: 14px;
+        right: 18px;
+        z-index: 30;
+        border-radius: 999px;
+        background: var(--dc-bg-elevated);
+        color: var(--dc-text);
+        box-shadow: var(--dc-shadow);
+        padding: 0.45rem 0.75rem;
+        font: 600 12px/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        cursor: pointer;
+      }
+
+      .theme-toggle:hover {
+        color: var(--dc-accent-strong);
+      }
+
+      @media screen and (max-width: 768px) {
+        .theme-toggle {
+          top: 10px;
+          right: 56px;
+        }
       }
     </style>
   </head>
   <body>
     <div id="app"></div>
     <script>
+      (function () {
+        var storedTheme = localStorage.getItem("drift-control-theme");
+        if (storedTheme === "dark") {
+          document.documentElement.classList.add("theme-dark");
+        } else if (storedTheme === "light") {
+          document.documentElement.classList.add("theme-light");
+        }
+      })();
+
       window.$docsify = {
-        name: "Drift Control Packet",
+        name: "Drift Control Handbook",
         homepage: "README.md",
         loadSidebar: true,
-        relativePath: true,
+        relativePath: false,
         subMaxLevel: 3,
         auto2top: true,
         search: {
@@ -38,6 +228,43 @@
           noData: "No matching section",
         },
       };
+    </script>
+    <script>
+      (function () {
+        function getTheme() {
+          if (document.documentElement.classList.contains("theme-dark")) return "dark";
+          if (document.documentElement.classList.contains("theme-light")) return "light";
+          return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+
+        function applyTheme(theme) {
+          document.documentElement.classList.remove("theme-dark", "theme-light");
+          document.documentElement.classList.add(theme === "dark" ? "theme-dark" : "theme-light");
+          localStorage.setItem("drift-control-theme", theme);
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute("content", theme === "dark" ? "#101418" : "#f4f7f8");
+          var button = document.querySelector(".theme-toggle");
+          if (button) button.textContent = theme === "dark" ? "Light mode" : "Dark mode";
+        }
+
+        function ensureToggle() {
+          if (document.querySelector(".theme-toggle")) return;
+          var button = document.createElement("button");
+          button.className = "theme-toggle";
+          button.type = "button";
+          button.addEventListener("click", function () {
+            applyTheme(getTheme() === "dark" ? "light" : "dark");
+          });
+          document.body.appendChild(button);
+          applyTheme(getTheme());
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", ensureToggle);
+        } else {
+          ensureToggle();
+        }
+      })();
     </script>
     <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
     <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
