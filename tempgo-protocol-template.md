@@ -1,40 +1,52 @@
 # tempgo Protocol Template
 
-This page describes a generic, packetized documentation-and-change protocol for drift control. The model is designed for repositories that need more than ad hoc task prompts: they need a durable workstream contract, bounded worker packets, machine-readable continuation state, and seam audits between steps.
+This page describes a packetized protocol for multi-step technical work. The point of the model is simple: when a task is broad, risky, resumable, or likely to drift, the work should not live only in chat memory. It should live in a bounded workstream with explicit steps, explicit ownership, machine-readable state, and seam audits between slices.
+
+> **Summary**
+> A usable tempgo-style protocol needs:
+> - a full orchestrator that owns sequence and stop conditions
+> - bounded worker packets for narrow execution slices
+> - seam audits between completed slices
+> - a step list plus step-state file as the continuity source of truth
 
 > **Generic-first rule**
->
-> Treat the protocol as a reusable control pattern. Repository-specific paths, scripts, and policies are implementation details layered on top, not the protocol itself.
+> Treat the protocol as a reusable control pattern. Repository-specific paths, scripts, and policy docs are implementation details layered on top, not the protocol itself.
 
 ## Overview
 
-The protocol splits work into four durable artifacts:
-
 | Artifact | Role | Why it exists | Typical format |
 | --- | --- | --- | --- |
-| Protocol page | Defines the execution contract | Prevents teams from improvising process per task | Markdown |
-| Workstream / step list | Declares ordered tasks, dependencies, ownership, and audit boundaries | Makes sequence and resume behavior explicit | Markdown or YAML |
-| Step state | Stores runtime truth for the current workstream | Lets a paused or transferred session resume without guessing | JSON |
-| Seam audit | Verifies a completed slice before continuation | Stops silent drift between packets | Markdown or JSON |
+| protocol page | defines the execution contract | stops teams from improvising process per task | Markdown |
+| workstream or step list | declares order, dependencies, ownership, and audit boundaries | makes continuation rules explicit | Markdown or YAML |
+| step state | stores runtime truth for the current workstream | lets a paused or transferred session resume without guessing | JSON |
+| seam audit | verifies a completed slice before continuation | stops silent drift between packets | Markdown or JSON |
 
-The operating principle is simple: broad work is orchestrated by a rigorous parent packet; narrow work is executed by tightly bounded child packets; every handoff crosses an explicit audit seam; the step list and step state remain the continuity source of truth.
+The core operating rule is straightforward: broad work is orchestrated by a parent packet, narrow work is executed by tightly bounded child packets, every handoff crosses an audit seam, and sequence authority remains in the step list and step state rather than in conversation.
 
 > **What this prevents**
->
-> The protocol is built to stop scope creep, hidden dependency drift, conversational plan loss, and false confidence after partial implementation.
+> This model is designed to stop scope creep, hidden dependency drift, conversational plan loss, and false confidence after partial implementation.
+
+---
 
 ## Operating Modes
 
-Use distinct modes instead of one oversized prompt shape.
+Use distinct packet modes instead of one oversized prompt shape.
 
 | Mode | Use when | Must own | Must return | Escalate when |
 | --- | --- | --- | --- | --- |
-| `full` orchestrator | Multi-step, cross-surface, risky, or resumable work | Sequence, branch or baseline discipline, next-task selection, audit gating | Updated step state, audit result, next task selection | Scope widens, blockers appear, or audit fails |
-| `lite` worker | One bounded slice with low ambiguity | One owned surface or one tightly coupled slice | Tight handoff report only: outputs, checks, blockers, residual risks, next-step constraints | Hidden dependencies, policy ambiguity, or cross-surface expansion appears |
-| `audit` seam check | After each completed slice or checkpoint | Scope compliance, acceptance status, seam compatibility, next-step readiness | `pass`, `fail`, or `blocked` with findings and handoff data | Independent review is required or confidence is low |
-| `step-list` authority | Whenever work has more than one meaningful step | Order, dependencies, stop conditions, audit boundaries, ownership | Canonical sequence and current runtime state | Never replaced by chat memory |
+| `full` orchestrator | multi-step, cross-surface, risky, or resumable work | sequence, baseline discipline, next-task selection, audit gating | updated step state, audit result, next task selection | scope widens, blockers appear, or audit fails |
+| `lite` worker | one bounded slice with low ambiguity | one owned surface or tightly coupled slice | tight handoff report: outputs, checks, blockers, residual risks, next-step constraints | hidden dependencies or cross-surface expansion appears |
+| `audit` seam check | after each completed slice or checkpoint | scope compliance, acceptance status, seam compatibility, next-step readiness | `pass`, `fail`, or `blocked` with findings and handoff data | independent review is required or confidence is low |
+| `step-list` authority | whenever work has more than one meaningful step | order, dependencies, stop conditions, audit boundaries, ownership | canonical sequence and current runtime state | never replaced by chat memory |
 
-Recommended trigger language:
+### Mode Selection Rules
+
+- use `full` when the next action depends on sequence control or cross-step state
+- use `lite` only when one slice is genuinely bounded and has one clear owner
+- use `audit` after every meaningful completion seam
+- use `step-list` whenever resumption would be unsafe without a declared order
+
+### Trigger Language
 
 ```text
 full: protocol-name: <multi-step objective>
@@ -42,22 +54,24 @@ lite: protocol-name-lite: <bounded task>
 audit: protocol-name-audit: <checkpoint or completed slice>
 ```
 
+---
+
 ## Workstream Shape
 
-The workstream should be shaped as a loop, not a one-shot instruction burst.
+The workstream should behave like a loop, not a one-shot prompt burst.
 
 | Phase | Full orchestrator responsibility | Durable output |
 | --- | --- | --- |
-| Intake | Restate objective, owned scope, forbidden scope, required references, stop conditions | Packet header |
-| Mode selection | Decide whether the next slice is `full` only, `lite`, or `blocked` | Mode declaration |
-| Step-list lock | Approve or update the ordered workstream plan before execution | Step list |
-| Preflight | Verify baseline, branch or revision alignment, prerequisites, and open blockers | Preflight record |
-| Execute | Run the current bounded slice only | Worker output or direct change |
-| Seam audit | Verify acceptance, scope compliance, and next-step safety | Audit result |
-| State inject | Write the execution and audit truth back into machine-readable state | Step state JSON |
-| Continue or stop | Select the next eligible task, or halt with a concrete reason | Next-action decision |
+| Intake | restate objective, owned scope, forbidden scope, required references, stop conditions | packet header |
+| Mode selection | decide whether the next slice is `full`, `lite`, or `blocked` | mode declaration |
+| Step-list lock | approve or update the ordered plan before execution | step list |
+| Preflight | verify baseline, branch or revision alignment, prerequisites, and open blockers | preflight record |
+| Execute | run the current bounded slice only | worker output or direct change |
+| Seam audit | verify acceptance, scope compliance, and next-step safety | audit result |
+| State inject | write execution and audit truth back into machine-readable state | step state JSON |
+| Continue or stop | select the next eligible task or halt with a concrete reason | next-action decision |
 
-Minimal loop:
+### Minimal Loop
 
 1. Lock sequence.
 2. Execute one bounded slice.
@@ -65,73 +79,83 @@ Minimal loop:
 4. Inject state.
 5. Continue only if the next slice is still well-defined.
 
+> **Continuation rule**
+> Resume from the step state file, not from memory and not from the last chat message.
+
+---
+
 ## Step List And State Model
 
-The step list is the static plan; the step state is the live record. They should agree on identifiers, dependencies, and audit boundaries.
+The step list is the static plan. The step state is the live record. They need to agree on identifiers, dependencies, and audit boundaries.
 
-### Step list fields
+### Step List Fields
 
 | Field | Required | Purpose |
 | --- | --- | --- |
-| `step_id` | Yes | Stable identifier used by state and audit outputs |
-| `title` | Yes | Human-readable description of the slice |
+| `step_id` | Yes | stable identifier used by state and audit outputs |
+| `title` | Yes | human-readable description of the slice |
 | `mode` | Yes | `full`, `lite`, or another explicitly defined mode |
-| `depends_on` | Yes | Prevents invalid out-of-order execution |
-| `owned_scope` | Yes | Defines the exact files, modules, or surfaces the slice may touch |
-| `acceptance_checks` | Yes | Defines how completion is judged |
-| `audit_boundary` | Yes | States whether a seam audit is mandatory before continuation |
-| `stop_conditions` | Yes | Forces an explicit return when assumptions break |
+| `depends_on` | Yes | prevents invalid out-of-order execution |
+| `owned_scope` | Yes | defines the exact files, modules, or surfaces the slice may touch |
+| `acceptance_checks` | Yes | defines how completion is judged |
+| `audit_boundary` | Yes | states whether a seam audit is mandatory before continuation |
+| `stop_conditions` | Yes | forces an explicit return when assumptions break |
 
-### Runtime state fields
+### Runtime State Fields
 
 | Field | Meaning |
 | --- | --- |
-| `status` | Current lifecycle state for the step |
-| `attempt` | Retry counter for the current step |
-| `last_worker_packet` | Identifier or path for the most recent execution packet |
+| `status` | current lifecycle state for the step |
+| `attempt` | retry counter for the current step |
+| `last_worker_packet` | identifier or path for the most recent execution packet |
 | `last_audit_verdict` | `pass`, `fail`, `blocked`, or `not_run` |
-| `blockers` | Facts preventing continuation |
-| `residual_risks` | Known concerns accepted or awaiting follow-up |
-| `next_step_constraints` | Inputs the next packet must honor |
-| `evidence` | Commands, files, or outputs proving the step's current state |
+| `blockers` | facts preventing continuation |
+| `residual_risks` | known concerns accepted or awaiting follow-up |
+| `next_step_constraints` | inputs the next packet must honor |
+| `evidence` | commands, files, or outputs proving the step's current state |
 
-### Status model
+### Status Model
 
 | Status | Meaning | Allowed next states |
 | --- | --- | --- |
-| `pending` | Not started and not eligible yet | `ready`, `blocked` |
-| `ready` | Dependencies satisfied and can be launched | `in_progress`, `blocked` |
-| `in_progress` | Active execution packet owns the slice | `audit_pending`, `blocked` |
-| `audit_pending` | Execution finished; seam audit still required | `done`, `rework`, `blocked` |
-| `rework` | Audit found defects but the slice remains bounded | `in_progress`, `blocked` |
-| `done` | Acceptance and seam checks passed | none |
-| `blocked` | Continuation is unsafe or impossible without intervention | `ready`, `in_progress` only after explicit unblock |
+| `pending` | not started and not eligible yet | `ready`, `blocked` |
+| `ready` | dependencies satisfied and can be launched | `in_progress`, `blocked` |
+| `in_progress` | active execution packet owns the slice | `audit_pending`, `blocked` |
+| `audit_pending` | execution finished; seam audit still required | `done`, `rework`, `blocked` |
+| `rework` | audit found defects but the slice remains bounded | `in_progress`, `blocked` |
+| `done` | acceptance and seam checks passed | none |
+| `blocked` | continuation is unsafe or impossible without intervention | `ready`, `in_progress` only after explicit unblock |
 
-> **State discipline**
->
-> Resume from the step state file, not from memory and not from the last chat message.
+### Design Rules
+
+- stable `step_id` values matter more than pretty titles
+- state must record reality, not intention
+- blockers and residual risks belong in state, not hidden in narrative prose
+- if the next task is ambiguous, stop and say so instead of improvising continuation
+
+---
 
 ## Seam Audits
 
-Seam audits are packet-local control points. They verify that the next step will inherit a coherent state instead of wishful thinking.
+Seam audits are packet-local control points. They verify that the next step inherits a coherent state rather than wishful thinking.
 
 | Audit question | Why it matters | Typical evidence |
 | --- | --- | --- |
-| Did the slice stay inside owned scope? | Prevents stealth scope expansion | Diff, touched files, ownership map |
-| Did the declared checks actually run? | Prevents "done" without proof | Command output, test results, screenshots, logs |
-| Did the change preserve seam compatibility? | Prevents the next worker inheriting broken assumptions | Interface diff, schema check, doc update, build result |
-| Are blockers or residual risks now explicit? | Prevents buried follow-up work | Audit report findings |
-| Is the next task still bounded? | Prevents the parent packet from issuing unsafe next prompts | Updated constraints in state JSON |
+| Did the slice stay inside owned scope? | prevents stealth scope expansion | diff, touched files, ownership map |
+| Did the declared checks actually run? | prevents "done" without proof | command output, test results, screenshots, logs |
+| Did the change preserve seam compatibility? | prevents the next worker inheriting broken assumptions | interface diff, schema check, doc update, build result |
+| Are blockers or residual risks explicit? | prevents buried follow-up work | audit findings and state updates |
+| Is the next task still bounded? | prevents unsafe next prompts | updated constraints in state JSON |
 
-Recommended verdict contract:
+### Verdict Contract
 
 | Verdict | Meaning | Parent action |
 | --- | --- | --- |
-| `pass` | Slice is complete enough for the next planned step | Inject audit state and continue |
-| `fail` | The slice did not meet acceptance or seam compatibility | Route to rework or halt |
-| `blocked` | The next safe move is unclear or externally blocked | Stop and report exact blocker |
+| `pass` | slice is complete enough for the next planned step | inject audit state and continue |
+| `fail` | slice did not meet acceptance or seam compatibility | route to rework or halt |
+| `blocked` | the next safe move is unclear or externally blocked | stop and report the exact blocker |
 
-Example seam-audit output:
+### Example Seam-Audit Output
 
 ```json
 {
@@ -152,29 +176,35 @@ Example seam-audit output:
 }
 ```
 
+> **Audit rule**
+> A seam audit is not the same thing as a release audit or repository-wide audit. It is a local control point between bounded slices.
+
+---
+
 ## In This Repository
 
 This repository is only an example lane for the pattern above.
 
 | Example surface in this workspace | Generic role in the protocol |
 | --- | --- |
-| `runbook-policy/studio/protocols/tempgo-protocol.md` | Full orchestrator contract |
-| `runbook-policy/studio/protocols/tempgo-step-list-protocol.md` | Canonical sequence and runtime-state contract |
-| `runbook-policy/studio/protocols/tempgo-lite-protocol.md` | Bounded worker packet |
-| `runbook-policy/studio/protocols/tempgo-audit-protocol.md` | Packet-local seam audit |
-| `drift-control-packet-public/*.md` | Public explanatory publication layer |
+| `runbook-policy/studio/protocols/tempgo-protocol.md` | full orchestrator contract |
+| `runbook-policy/studio/protocols/tempgo-step-list-protocol.md` | canonical sequence and runtime-state contract |
+| `runbook-policy/studio/protocols/tempgo-lite-protocol.md` | bounded worker packet |
+| `runbook-policy/studio/protocols/tempgo-audit-protocol.md` | packet-local seam audit |
+| `drift-control-packet-public/*.md` | public explanatory publication layer |
 
-Concrete ideas modeled from the example lane:
+### What The Example Demonstrates
 
-- A parent packet, not the child worker, decides what task runs next.
-- A lite worker stays narrow and returns across a seam instead of widening scope in place.
-- Multi-step work uses a step list as sequence authority instead of conversational planning.
-- Every checkpoint writes machine-readable state so pause and resume are deterministic.
-- Packet-local audit is distinct from whole-repository audit.
+- a parent packet, not the child worker, decides what task runs next
+- a lite worker stays narrow and returns across a seam instead of widening scope in place
+- multi-step work uses a step list as sequence authority instead of conversational planning
+- every checkpoint writes machine-readable state so pause and resume are deterministic
+- packet-local audit is distinct from whole-repository audit
 
 > **Example-lane warning**
->
-> Do not hard-code this repository's paths into your own implementation. Recreate the roles, not the filenames.
+> Do not hard-code this repository's paths into your own implementation. Recreate the roles, file contracts, and continuation rules instead.
+
+---
 
 ## Mermaid Diagram
 
@@ -198,9 +228,17 @@ flowchart TD
     K --> D
 ```
 
+---
+
 ## Key Snippets
 
-Trigger and packet selection:
+| Snippet | Purpose |
+| --- | --- |
+| trigger and packet selection | decide which protocol mode is appropriate |
+| lite-worker handoff | standardize bounded execution output |
+| orchestrator continuation rule | standardize when the parent continues or stops |
+
+### 1. Trigger And Packet Selection
 
 ```text
 Use full protocol when the workstream spans multiple steps, surfaces, or audit boundaries.
@@ -208,7 +246,7 @@ Use lite protocol only for one bounded slice with one owner and a clean return s
 Run seam audit after every completed slice before selecting the next worker packet.
 ```
 
-Tight lite-worker handoff:
+### 2. Tight Lite-Worker Handoff
 
 ```yaml
 step_id: step-02
@@ -226,12 +264,14 @@ next_step_constraints:
   - do not introduce repo-specific assumptions
 ```
 
-Orchestrator continuation rule:
+### 3. Orchestrator Continuation Rule
 
 ```text
 If state is current and the seam audit verdict is pass, continue to the next eligible step without asking for a new plan.
 If verdict is fail or blocked, stop with the exact reason and required corrective action.
 ```
+
+---
 
 ## Workstream Template
 
@@ -313,18 +353,31 @@ If verdict is fail or blocked, stop with the exact reason and required correctiv
 }
 ```
 
+---
+
 ## Implementation Checklist
 
-- Define one protocol family with at least `full`, `lite`, `audit`, and `step-list` roles.
-- Standardize trigger phrases so operators do not invent new packet shapes ad hoc.
-- Create a durable step-list format with stable `step_id` values.
-- Create a machine-readable state file that uses the same step identifiers as the step list.
-- Require seam audits after each completed slice or declared checkpoint.
-- Keep lite packets single-slice and force return on ambiguity, hidden dependency drift, or scope expansion.
-- Make parent packets responsible for continuation, not child workers.
-- Store enough evidence in state or linked artifacts that a new session can resume safely.
-- Distinguish packet-local seam audit from whole-repository or release audit.
-- Publish a reader-facing explanation of the system so the protocol does not live only in prompts.
+### Core Roles
+
+- [ ] define one protocol family with at least `full`, `lite`, `audit`, and `step-list` roles
+- [ ] standardize trigger phrases so operators do not invent new packet shapes ad hoc
+- [ ] publish a reader-facing explanation so the protocol does not live only in prompts
+
+### Sequence And State
+
+- [ ] create a durable step-list format with stable `step_id` values
+- [ ] create a machine-readable state file that uses the same step identifiers as the step list
+- [ ] make parent packets responsible for continuation rather than child workers
+- [ ] store enough evidence in state or linked artifacts that a new session can resume safely
+
+### Bounded Execution
+
+- [ ] require seam audits after each completed slice or declared checkpoint
+- [ ] keep lite packets single-slice and force return on ambiguity, hidden dependency drift, or scope expansion
+- [ ] distinguish packet-local seam audit from whole-repository or release audit
+- [ ] define explicit stop conditions rather than permissive continuation rules
+
+---
 
 ## Repo-Agnostic Build Prompt
 
@@ -357,12 +410,6 @@ Protocol requirements:
 - The public docs must explain the system in concise, dense prose and include at least one table, one mermaid diagram, and concrete snippets.
 
 Implementation guidance:
-- Choose sensible paths in this repo for docs, templates, and state examples.
-- If related docs already exist, align with them instead of duplicating terminology.
-- Keep all new artifacts editable by humans and parseable by automation.
-- Prefer explicit stop conditions over permissive continuation rules.
-
-Execution tasks:
 1. Inspect the repository and identify the best location for protocol docs and templates.
 2. Draft the public overview page first so the model is clear.
 3. Create the step-list, state, and seam-audit templates.
@@ -370,7 +417,7 @@ Execution tasks:
 5. Summarize how an operator would run a multi-step workstream and how a paused workstream resumes.
 
 Output requirements:
-- Report every file you created or changed.
-- Summarize any assumptions.
-- If the repo lacks a suitable place for these artifacts, propose one and proceed consistently.
+- report every file you created or changed
+- summarize any assumptions
+- if the repo lacks a suitable place for these artifacts, propose one and proceed consistently
 ```
